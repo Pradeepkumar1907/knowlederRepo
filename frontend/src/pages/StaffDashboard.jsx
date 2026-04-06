@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { LayoutDashboard, BookOpen, ThumbsUp, Activity, TrendingUp, Clock, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -15,8 +15,8 @@ const StaffDashboard = () => {
     const fetchDashboard = async () => {
       try {
         const [statsRes, articlesRes] = await Promise.all([
-          axios.get('/api/users/dashboard'),
-          axios.get('/api/articles/my')
+          api.get('/api/users/dashboard'),
+          api.get('/api/articles/my')
         ]);
         setStats(statsRes.data);
         setMyArticles(articlesRes.data);

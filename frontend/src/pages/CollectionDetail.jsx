@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { ArrowLeft, ThumbsUp, Trash2, FolderMinus, Shield } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import FollowButton from '../components/FollowButton';
@@ -18,7 +18,7 @@ const CollectionDetail = () => {
 
   const fetchCollection = async () => {
     try {
-      const { data } = await axios.get(`/api/collections/${id}`);
+      const { data } = await api.get(`/api/collections/${id}`);
       setCollection(data);
     } catch (error) {
       console.error(error);
@@ -34,7 +34,7 @@ const CollectionDetail = () => {
     e.preventDefault();
     e.stopPropagation();
     try {
-      await axios.post(`/api/collections/${id}/remove`, { articleId });
+      await api.post(`/api/collections/${id}/remove`, { articleId });
       setCollection(prev => ({
         ...prev,
         articles: prev.articles.filter(a => a._id !== articleId)

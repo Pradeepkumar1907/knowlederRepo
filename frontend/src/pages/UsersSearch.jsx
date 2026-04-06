@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { Link } from 'react-router-dom';
 import { Search, User, Users, Shield } from 'lucide-react';
 import FollowButton from '../components/FollowButton';
@@ -19,7 +19,7 @@ const UsersSearch = () => {
 
       setLoading(true);
       try {
-        const { data } = await axios.get(`/api/users/search?query=${query}`);
+        const { data } = await api.get(`/api/users/search?query=${query}`);
         setResults(data);
         setError(null);
       } catch (error) {

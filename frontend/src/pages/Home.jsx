@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { Link } from 'react-router-dom';
 import { Search, Filter, ArrowRight, Book } from 'lucide-react';
 import FollowButton from '../components/FollowButton';
@@ -11,7 +11,7 @@ const Home = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const { data } = await axios.get('/api/articles');
+        const { data } = await api.get('/api/articles');
         setArticles(data.slice(0, 3));
         setLoading(false);
       } catch (error) {

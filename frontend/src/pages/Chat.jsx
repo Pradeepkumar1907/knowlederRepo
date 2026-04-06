@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { io } from 'socket.io-client';
 import { Send, User, MessageCircle, ArrowLeft } from 'lucide-react';
@@ -18,8 +18,9 @@ const Chat = () => {
 
   // Initialize Socket
   useEffect(() => {
-    // Connect to the current origin (Vite will proxy /socket.io requests)
-    const newSocket = io();
+    // Connect to the backend URL
+    const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+    const newSocket = io(backendUrl);
     setSocket(newSocket);
 
     return () => newSocket.close();
@@ -48,8 +49,8 @@ const Chat = () => {
     const fetchData = async () => {
       try {
         const [chatsRes, followingRes] = await Promise.all([
-          axios.get('/api/chat'),
-          axios.get('/api/users/following')
+          api.get('/api/chat'),
+          api.get('/api/users/following')
         ]);
         setChats(chatsRes.data);
         setFollowedUsers(followingRes.data);
@@ -62,7 +63,7 @@ const Chat = () => {
 
   const handleStartChat = async (userId) => {
     try {
-      const { data } = await axios.post(`/api/chat/${userId}`);
+      const { data } = await api.post(`/api/chat/${userId}`);
       // If this chat isn't in our active list, add it
       if (!chats.find(c => c._id === data._id)) {
         setChats([data, ...chats]);
@@ -78,7 +79,7 @@ const Chat = () => {
     if (selectedChat) {
       const fetchMessages = async () => {
         try {
-          const { data } = await axios.get(`/api/message/${selectedChat._id}`);
+          const { data } = await api.get(`/api/message/${selectedChat._id}`);
           setMessages(data);
           socket?.emit('joinRoom', selectedChat._id);
         } catch (error) {
@@ -99,7 +100,7 @@ const Chat = () => {
     if (!newMessage.trim() || !selectedChat) return;
 
     try {
-      const { data } = await axios.post('/api/message', {
+      const { data } = await api.post('/api/message', {
         chatId: selectedChat._id,
         text: newMessage
       });

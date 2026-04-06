@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { Save, X, ArrowLeft, Type, AlignLeft, Tag } from 'lucide-react';
 import Dropdown from '../components/Dropdown';
@@ -20,7 +20,7 @@ const CreateEditArticle = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get('/api/categories');
+        const { data } = await api.get('/api/categories');
         setAvailableCategories(data);
         if (data.length > 0 && !id) {
           setCategoryName(data[0].name);
@@ -36,7 +36,7 @@ const CreateEditArticle = () => {
       const fetchArticle = async () => {
         setFetching(true);
         try {
-          const { data } = await axios.get(`/api/articles/${id}`);
+          const { data } = await api.get(`/api/articles/${id}`);
           if (data.author?._id !== user?._id && user?.role !== 'admin') {
             navigate('/articles');
             return;
@@ -64,9 +64,9 @@ const CreateEditArticle = () => {
 
     try {
       if (id) {
-        await axios.put(`/api/articles/${id}`, articleData);
+        await api.put(`/api/articles/${id}`, articleData);
       } else {
-        await axios.post('/api/articles', articleData);
+        await api.post('/api/articles', articleData);
       }
       navigate('/articles');
     } catch (error) {

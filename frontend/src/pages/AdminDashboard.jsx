@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { Shield, Users, BookOpen, ThumbsUp, Activity, UserPlus, FileText, Settings, Trash2, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -19,9 +19,9 @@ const AdminDashboard = () => {
     const fetchAdminData = async () => {
       try {
         const [statsRes, usersRes, catsRes] = await Promise.all([
-          axios.get('/api/users/admin/stats'),
-          axios.get('/api/users/admin/users'),
-          axios.get('/api/categories')
+          api.get('/api/users/admin/stats'),
+          api.get('/api/users/admin/users'),
+          api.get('/api/categories')
         ]);
         setStats(statsRes.data);
         setUsers(usersRes.data);
@@ -39,7 +39,7 @@ const AdminDashboard = () => {
   const deleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        await axios.delete(`/api/users/${userId}`);
+        await api.delete(`/api/users/${userId}`);
         setUsers(users.filter(u => u._id !== userId));
       } catch (err) {
         console.error(err);
@@ -51,7 +51,7 @@ const AdminDashboard = () => {
   const createCategory = async () => {
     if (!newCategoryName.trim()) return;
     try {
-      const { data } = await axios.post('/api/categories', { name: newCategoryName });
+      const { data } = await api.post('/api/categories', { name: newCategoryName });
       setCategories([...categories, data].sort((a, b) => a.name.localeCompare(b.name)));
       setNewCategoryName('');
     } catch (err) {
@@ -63,7 +63,7 @@ const AdminDashboard = () => {
   const updateCategory = async (id) => {
     if (!editCategoryName.trim()) return;
     try {
-      const { data } = await axios.put(`/api/categories/${id}`, { name: editCategoryName });
+      const { data } = await api.put(`/api/categories/${id}`, { name: editCategoryName });
       setCategories(categories.map(c => c._id === id ? data : c).sort((a, b) => a.name.localeCompare(b.name)));
       setEditingCategory(null);
     } catch (err) {
@@ -75,7 +75,7 @@ const AdminDashboard = () => {
   const deleteCategory = async (id) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
-        await axios.delete(`/api/categories/${id}`);
+        await api.delete(`/api/categories/${id}`);
         setCategories(categories.filter(c => c._id !== id));
       } catch (err) {
         console.error(err);

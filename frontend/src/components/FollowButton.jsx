@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { UserPlus, UserMinus, Users } from 'lucide-react';
 
@@ -13,7 +13,7 @@ const FollowButton = ({ targetUserId, initialIsFollowing = null, initialIsMutual
   useEffect(() => {
     const checkFollowing = async () => {
       try {
-        const { data } = await axios.get(`/api/users/${targetUserId}`);
+        const { data } = await api.get(`/api/users/${targetUserId}`);
         setIsFollowing(data.isFollowing);
         setIsFollowedBy(data.isFollowedBy);
         setIsMutual(data.isMutual);
@@ -40,12 +40,12 @@ const FollowButton = ({ targetUserId, initialIsFollowing = null, initialIsMutual
 
     try {
       if (isFollowing) {
-        await axios.post(`/api/users/unfollow/${targetUserId}`);
+        await api.post(`/api/users/unfollow/${targetUserId}`);
         setIsFollowing(false);
         setIsMutual(false);
         if (onToggle) onToggle(false);
       } else {
-        await axios.post(`/api/users/follow/${targetUserId}`);
+        await api.post(`/api/users/follow/${targetUserId}`);
         setIsFollowing(true);
         if (isFollowedBy) setIsMutual(true);
         if (onToggle) onToggle(true);

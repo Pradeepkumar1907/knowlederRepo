@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { LayoutDashboard, BookOpen, ThumbsUp, Bookmark, Search, Clock, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -14,8 +14,8 @@ const CustomerDashboard = () => {
     const fetchDashboard = async () => {
       try {
         const [statsRes, profileRes] = await Promise.all([
-          axios.get('/api/dashboard/customer'),
-          axios.get('/api/users/profile')
+          api.get('/api/dashboard/customer'),
+          api.get('/api/users/profile')
         ]);
         setStats(statsRes.data);
         setRecentlyViewed(profileRes.data.recentlyViewed || []);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { Search, Filter, ArrowRight, Book, ThumbsUp, Trash2, Shield, Bookmark } from 'lucide-react';
 import FollowButton from '../components/FollowButton';
@@ -21,7 +21,7 @@ const ArticlesList = () => {
 
   const fetchCategories = async () => {
     try {
-      const { data } = await axios.get('/api/categories');
+      const { data } = await api.get('/api/categories');
       setAvailableCategories(data);
     } catch (error) {
       console.error(error);
@@ -32,7 +32,7 @@ const ArticlesList = () => {
     setLoading(true);
     try {
       const queryCat = categoryId || (categoryName === 'All' ? 'All' : '');
-      const { data } = await axios.get(`/api/articles?search=${search}&category=${queryCat}`);
+      const { data } = await api.get(`/api/articles?search=${search}&category=${queryCat}`);
       setArticles(data);
       setLoading(false);
     } catch (error) {
@@ -46,7 +46,7 @@ const ArticlesList = () => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this article?')) {
       try {
-        await axios.delete(`/api/articles/${id}`);
+        await api.delete(`/api/articles/${id}`);
         fetchArticles();
       } catch (error) {
         console.error(error);

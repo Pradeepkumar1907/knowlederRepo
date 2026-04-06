@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { ThumbsUp, Calendar, User, ArrowLeft, Edit, Trash2, Bookmark } from 'lucide-react';
 import FollowButton from '../components/FollowButton';
@@ -22,8 +22,8 @@ const ArticleDetail = () => {
     const fetchArticleData = async () => {
       try {
         const [{ data: articleData }, { data: commentsData }] = await Promise.all([
-          axios.get(`/api/articles/${id}`),
-          axios.get(`/api/articles/${id}/comments`)
+          api.get(`/api/articles/${id}`),
+          api.get(`/api/articles/${id}/comments`)
         ]);
         setArticle(articleData);
         setComments(commentsData);
@@ -43,7 +43,7 @@ const ArticleDetail = () => {
       return;
     }
     try {
-      const { data } = await axios.post(`/api/articles/${id}/like`);
+      const { data } = await api.post(`/api/articles/${id}/like`);
       setArticle(prev => ({ 
         ...prev, 
         likes: data.isLiked ? [...prev.likes, user._id] : prev.likes.filter(lid => lid !== user._id) 
@@ -57,7 +57,7 @@ const ArticleDetail = () => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this article?')) {
       try {
-        await axios.delete(`/api/articles/${id}`);
+        await api.delete(`/api/articles/${id}`);
         navigate('/articles');
       } catch (error) {
         console.error(error);
@@ -71,7 +71,7 @@ const ArticleDetail = () => {
 
     setCommentLoading(true);
     try {
-      const { data } = await axios.post(`/api/articles/${id}/comment`, { text: newComment });
+      const { data } = await api.post(`/api/articles/${id}/comment`, { text: newComment });
       setComments(data);
       setNewComment('');
     } catch (error) {

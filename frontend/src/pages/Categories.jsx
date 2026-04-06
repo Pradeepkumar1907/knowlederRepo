@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Edit, Trash2, Plus, ArrowRight } from 'lucide-react';
@@ -16,7 +16,7 @@ const Categories = () => {
 
   const fetchCategories = async () => {
     try {
-      const { data } = await axios.get('/api/categories');
+      const { data } = await api.get('/api/categories');
       setCategories(data);
       setLoading(false);
     } catch (error) {
@@ -33,7 +33,7 @@ const Categories = () => {
     e.preventDefault();
     if (!newCategoryName.trim()) return;
     try {
-      const { data } = await axios.post('/api/categories', { name: newCategoryName });
+      const { data } = await api.post('/api/categories', { name: newCategoryName });
       // Since the API returns the new category without articleCount, we can add it locally
       setCategories([...categories, { ...data, articleCount: 0 }].sort((a, b) => a.name.localeCompare(b.name)));
       setNewCategoryName('');
@@ -46,7 +46,7 @@ const Categories = () => {
     e.stopPropagation();
     if (!editCategoryName.trim()) return;
     try {
-      const { data } = await axios.put(`/api/categories/${id}`, { name: editCategoryName });
+      const { data } = await api.put(`/api/categories/${id}`, { name: editCategoryName });
       setCategories(categories.map(c => c._id === id ? { ...c, name: data.name } : c).sort((a, b) => a.name.localeCompare(b.name)));
       setEditingCategory(null);
     } catch (err) {
@@ -58,7 +58,7 @@ const Categories = () => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
-        await axios.delete(`/api/categories/${id}`);
+        await api.delete(`/api/categories/${id}`);
         setCategories(categories.filter(c => c._id !== id));
       } catch (err) {
         alert(err.response?.data?.message || 'Failed to delete category');

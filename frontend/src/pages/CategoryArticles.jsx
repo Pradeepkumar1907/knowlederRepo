@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { ArrowLeft, BookOpen, ThumbsUp, Trash2, Shield, Bookmark } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import FollowButton from '../components/FollowButton';
@@ -21,14 +21,14 @@ const CategoryArticles = () => {
     setLoading(true);
     try {
       // Fetch all categories to get the name of this specific one
-      const catRes = await axios.get('/api/categories');
+      const catRes = await api.get('/api/categories');
       const category = catRes.data.find(c => c._id === id || c.id === id);
       if (category) {
         setCategoryName(category.name);
       }
 
       // Fetch articles for this category
-      const res = await axios.get(`/api/articles?category=${id}`);
+      const res = await api.get(`/api/articles?category=${id}`);
       setArticles(res.data);
       setLoading(false);
     } catch (error) {
@@ -46,7 +46,7 @@ const CategoryArticles = () => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this article?')) {
       try {
-        await axios.delete(`/api/articles/${articleId}`);
+        await api.delete(`/api/articles/${articleId}`);
         fetchCategoryAndArticles();
       } catch (error) {
         console.error(error);

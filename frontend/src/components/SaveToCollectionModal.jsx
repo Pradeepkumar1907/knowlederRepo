@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { X, Plus, Folder, Check } from 'lucide-react';
 
 const SaveToCollectionModal = ({ isOpen, onClose, articleId }) => {
@@ -20,7 +20,7 @@ const SaveToCollectionModal = ({ isOpen, onClose, articleId }) => {
   const fetchCollections = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('/api/collections');
+      const { data } = await api.get('/api/collections');
       setCollections(data);
     } catch (err) {
       console.error(err);
@@ -36,7 +36,7 @@ const SaveToCollectionModal = ({ isOpen, onClose, articleId }) => {
 
     setCreating(true);
     try {
-      const { data } = await axios.post('/api/collections', { name: newCollectionName });
+      const { data } = await api.post('/api/collections', { name: newCollectionName });
       setCollections([data, ...collections]);
       setNewCollectionName('');
       // Optionally auto-save right after creating? Let's keep it simple and just create it.
@@ -52,7 +52,7 @@ const SaveToCollectionModal = ({ isOpen, onClose, articleId }) => {
     setSavingId(collectionId);
     setError('');
     try {
-      await axios.post(`/api/collections/${collectionId}/add`, { articleId });
+      await api.post(`/api/collections/${collectionId}/add`, { articleId });
       // Update local state to reflect it's saved
       setCollections(collections.map(c => {
         if (c._id === collectionId) {

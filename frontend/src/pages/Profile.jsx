@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { User, Book, Heart, Settings, Shield, UserPlus, UserMinus, Users, MessageSquare } from 'lucide-react';
@@ -20,7 +20,7 @@ const Profile = () => {
 
   const handleStartChat = async () => {
     try {
-      const { data } = await axios.post(`/api/chat/${id}`);
+      const { data } = await api.post(`/api/chat/${id}`);
       navigate('/chat');
     } catch (error) {
       console.error('Failed to start chat', error);
@@ -33,7 +33,7 @@ const Profile = () => {
       setLoading(true);
       try {
         const endpoint = isOwnProfile ? '/api/users/profile' : `/api/users/${id}`;
-        const { data } = await axios.get(endpoint);
+        const { data } = await api.get(endpoint);
         
         if (isOwnProfile) {
           setProfileData(data);
@@ -62,12 +62,12 @@ const Profile = () => {
   const handleFollowToggle = async () => {
     try {
       if (isFollowing) {
-        await axios.post(`/api/users/unfollow/${id}`);
+        await api.post(`/api/users/unfollow/${id}`);
         setIsFollowing(false);
         setIsMutual(false);
         setFollowersCount(prev => prev - 1);
       } else {
-        await axios.post(`/api/users/follow/${id}`);
+        await api.post(`/api/users/follow/${id}`);
         setIsFollowing(true);
         if (isFollowedBy) setIsMutual(true);
         setFollowersCount(prev => prev + 1);

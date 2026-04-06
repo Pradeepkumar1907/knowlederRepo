@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { Folder, Trash2, Plus, ArrowRight } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 
@@ -18,7 +18,7 @@ const Collections = () => {
 
   const fetchCollections = async () => {
     try {
-      const { data } = await axios.get('/api/collections');
+      const { data } = await api.get('/api/collections');
       setCollections(data);
     } catch (error) {
       console.error(error);
@@ -33,7 +33,7 @@ const Collections = () => {
 
     setCreating(true);
     try {
-      const { data } = await axios.post('/api/collections', { name: newCollectionName });
+      const { data } = await api.post('/api/collections', { name: newCollectionName });
       setCollections([data, ...collections]);
       setNewCollectionName('');
     } catch (err) {
@@ -48,7 +48,7 @@ const Collections = () => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this collection?')) {
       try {
-        await axios.delete(`/api/collections/${id}`);
+        await api.delete(`/api/collections/${id}`);
         setCollections(collections.filter(c => c._id !== id));
       } catch (err) {
         console.error(err);
