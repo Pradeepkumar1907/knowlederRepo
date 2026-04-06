@@ -64,18 +64,32 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { identifier, password } = req.body;
 
+  if (!identifier || !password) {
+    return res.status(400).json({ message: 'Identifier and password are required' });
+  }
+
+  console.log(`Login attempt for identifier: "${identifier}"`);
+
   try {
     const user = await User.findOne({ 
       $or: [
-        { email: identifier },
-        { username: identifier }
+        { email: new RegExp('^' + identifier + '$', 'i') },
+        { username: new RegExp('^' + identifier + '$', 'i') }
       ]
-    });
+    }).select('+password');
 
     // Validate user exists
     if (!user) {
+      console.log(`User Not Found for identifier: "${identifier}"`);
       return res.status(404).json({ message: 'User not found' });
     }
+
+    if (!user.password) {
+      console.error(`User found but missing password field in database for identifier: "${identifier}"`);
+      return res.status(500).json({ message: 'Internal Server Error: Account data is corrupted' });
+    }
+
+    console.log(`User Found: ${user.username} (${user.role})`);
 
     // Validate password
     const isPasswordCorrect = await user.comparePassword(password);

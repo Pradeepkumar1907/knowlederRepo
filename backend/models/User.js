@@ -43,6 +43,13 @@ userSchema.pre('save', async function() {
 
 // Method to compare password
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!candidatePassword || !this.password) {
+    console.error('Password comparison error: missing candidate or hashed password', {
+      hasCandidate: !!candidatePassword,
+      hasHashed: !!this.password
+    });
+    return false;
+  }
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
