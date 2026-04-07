@@ -293,6 +293,41 @@ const Chat = () => {
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
+        /* Advanced Scrollbar Styling */
+        .chat-container *::-webkit-scrollbar {
+          width: 5px;
+          height: 5px;
+        }
+
+        .chat-container *::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .chat-container *::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 20px;
+          border: 1px solid transparent;
+          background-clip: content-box;
+          transition: all 0.3s ease;
+        }
+
+        .chat-container *:hover::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid transparent;
+          background-clip: content-box;
+        }
+
+        .chat-container *::-webkit-scrollbar-thumb:hover {
+          background: var(--primary) !important;
+          border: 0px solid transparent !important;
+        }
+
+        /* Firefox */
+        .chat-container * {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+        }
+
         .chat-container {
           height: calc(100vh - 120px);
           max-height: 800px;
@@ -353,14 +388,6 @@ const Chat = () => {
           padding-bottom: 0.5rem;
         }
 
-        .followed-users-row::-webkit-scrollbar {
-          height: 4px;
-        }
-
-        .followed-users-row::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
 
         .followed-user-chip {
           display: flex;
