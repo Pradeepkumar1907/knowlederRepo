@@ -16,20 +16,16 @@ const Layout = () => {
   };
 
   return (
-    <div className={`app-layout ${isCollapsed ? 'collapsed' : ''}`}>
-      <Sidebar 
-        isCollapsed={isCollapsed} 
-        isOpen={isMobileOpen} 
-        toggleSidebar={() => setIsMobileOpen(!isMobileOpen)} 
-      />
+    <div className="layout">
+      <Sidebar collapsed={isCollapsed} />
       
-      <main className={`main-content ${isCollapsed ? 'collapsed' : ''}`}>
+      <div className="main">
         <Topbar toggleSidebar={toggleSidebar} />
         
-        <div className="content-body">
+        <div className="content">
           <Outlet />
         </div>
-      </main>
+      </div>
     </div>
   );
 };

@@ -33,9 +33,6 @@ const Topbar = ({ toggleSidebar }) => {
           <button className="sidebar-toggle-btn" onClick={toggleSidebar} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
             <Menu size={24} />
           </button>
-          <Link to="/" className="topbar-logo" style={{ textDecoration: 'none', color: 'white', fontWeight: 700, fontSize: '1.2rem' }}>
-            KnowledgeRepo
-          </Link>
         </div>
 
         <div className="topbar-actions">

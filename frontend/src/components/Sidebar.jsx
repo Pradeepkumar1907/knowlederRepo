@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 
-const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
+const Sidebar = ({ collapsed }) => {
   const { user } = useAuth();
   const location = useLocation();
 
@@ -34,58 +34,45 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
   };
 
   return (
-    <>
-      {isOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
-      <aside className={`sidebar ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
-        <div className="sidebar-header">
-          <Link to="/" className="nav-logo" onClick={() => isOpen && toggleSidebar()}>
-            <img 
-              src="/logo.png" 
-              alt="Logo" 
-              style={{ width: '32px', height: '32px', display: 'block' }}
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            {!isCollapsed && <span className="logo-text">KnowledgeRepo</span>}
-          </Link>
-          <button className="mobile-toggle" onClick={toggleSidebar}>
-            <X size={24} />
-          </button>
-        </div>
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+      <div className="sidebar-header">
+        <Link to="/" className="sidebar-header" style={{ padding: 0, border: 'none', height: 'auto', textDecoration: 'none', color: 'inherit' }}>
+          <img src="/logo.png" className="logo" alt="Logo" />
+          {!collapsed && <span>KnowledgeRepo</span>}
+        </Link>
+      </div>
 
         <div className="sidebar-nav">
-          {!isCollapsed && <div className="sidebar-label">Main Menu</div>}
+          {!collapsed && <div className="sidebar-label">Main Menu</div>}
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               className={`sidebar-item ${isActive(item.path) ? 'active' : ''}`}
-              title={isCollapsed ? item.label : ''}
-              onClick={() => isOpen && toggleSidebar()}
+              title={collapsed ? item.label : ''}
             >
               {item.icon}
-              {!isCollapsed && <span className="label">{item.label}</span>}
+              {!collapsed && <span className="label">{item.label}</span>}
             </Link>
           ))}
 
           {user && (
             <>
-              {!isCollapsed && <div className="sidebar-divider"></div>}
-              {!isCollapsed && <div className="sidebar-label">User</div>}
+              {!collapsed && <div className="sidebar-divider"></div>}
+              {!collapsed && <div className="sidebar-label">User</div>}
               <Link
                 to={getDashboardPath()}
                 className={`sidebar-item ${isActive(getDashboardPath()) ? 'active' : ''}`}
-                title={isCollapsed ? 'Dashboard' : ''}
-                onClick={() => isOpen && toggleSidebar()}
+                title={collapsed ? 'Dashboard' : ''}
               >
                 <LayoutDashboard size={20} />
-                {!isCollapsed && <span className="label">Dashboard</span>}
+                {!collapsed && <span className="label">Dashboard</span>}
               </Link>
 
-              {user.role === 'staff' && !isCollapsed && (
+              {user.role === 'staff' && !collapsed && (
                 <Link
                   to="/create-article"
                   className={`sidebar-item ${isActive('/create-article') ? 'active' : ''}`}
-                  onClick={() => isOpen && toggleSidebar()}
                 >
                   <PlusCircle size={20} />
                   <span className="label">Create Article</span>
@@ -95,8 +82,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isCollapsed }) => {
           )}
         </div>
       </aside>
-    </>
-  );
+    );
 };
 
 export default Sidebar;

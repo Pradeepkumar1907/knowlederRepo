@@ -44,8 +44,7 @@ button {
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
   padding: 0 1.5rem;
 }
 
@@ -88,47 +87,74 @@ button {
   color: white;
 }
 
-/* Layout structure */
-.app-layout {
+/* New Layout Structure */
+.layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
 }
 
-.main-content {
-  flex: 1;
-  margin-left: var(--sidebar-width);
-  transition: margin-left 0.25s ease;
-  min-width: 0;
-}
-
-.main-content.collapsed {
-  margin-left: 72px;
-}
-
-.content-body {
-  padding: 2rem;
-  margin-top: var(--topbar-height);
-}
-
-/* Sidebar Styles */
 .sidebar {
-  width: var(--sidebar-width);
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
+  width: 240px;
+  transition: width 0.25s ease;
+  flex-shrink: 0;
   background: var(--bg-darker);
   border-right: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
   z-index: 1001;
-  transition: width 0.25s ease, transform 0.3s ease;
   overflow: hidden;
 }
 
 .sidebar.collapsed {
   width: 72px;
 }
+
+.main {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.content {
+  padding: 24px;
+  width: 100%;
+  flex: 1;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px;
+  font-weight: 700;
+  font-size: 18px;
+  height: var(--topbar-height);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.sidebar.collapsed .label,
+.sidebar.collapsed .sidebar-label,
+.sidebar.collapsed .sidebar-divider,
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+/* Sidebar Nav */
+.sidebar-nav {
+  padding: 1rem 0.5rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
 
 .sidebar.collapsed:hover {
   width: var(--sidebar-width);
@@ -242,10 +268,7 @@ button {
 /* Topbar styles */
 .topbar {
   height: var(--topbar-height);
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: var(--sidebar-width);
+  width: 100%;
   z-index: 1000;
   background: rgba(15, 23, 42, 0.8);
   backdrop-filter: blur(12px);
@@ -253,8 +276,8 @@ button {
   display: flex;
   align-items: center;
   padding: 0 2rem;
-  transition: left 0.25s ease;
 }
+
 
 .main-content.collapsed + .topbar,
 .app-layout.collapsed .topbar {
