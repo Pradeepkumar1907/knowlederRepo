@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { 
@@ -68,28 +69,48 @@ const loginUser = async (req, res) => {
     return res.status(400).json({ message: 'Identifier and password are required' });
   }
 
-  console.log(`Login attempt for identifier: "${identifier}"`);
+  const cleanIdentifier = identifier ? identifier.trim() : '';
+  const idLength = cleanIdentifier.length;
+
+  console.log('--- Deep Debug Login ---');
+  console.log(`Identifier Received: "${identifier}"`);
+  console.log(`Identifier Sanitized: "${cleanIdentifier}" (Length: ${idLength})`);
+  console.log(`Connected Database: ${mongoose.connection.name}`);
+  console.log(`Connection Host: ${mongoose.connection.host}`);
+  console.log('------------------------');
 
   try {
-    const user = await User.findOne({ 
+    // 1. Try a direct string match
+    let user = await User.findOne({ 
       $or: [
-        { email: new RegExp('^' + identifier + '$', 'i') },
-        { username: new RegExp('^' + identifier + '$', 'i') }
+        { email: cleanIdentifier },
+        { username: cleanIdentifier }
       ]
     }).select('+password');
 
+    // 2. If no direct match, try case-insensitive regex (just in case)
+    if (!user) {
+      console.log('No direct match, attempting case-insensitive regex lookup...');
+      user = await User.findOne({ 
+        $or: [
+          { email: new RegExp('^' + cleanIdentifier + '$', 'i') },
+          { username: new RegExp('^' + cleanIdentifier + '$', 'i') }
+        ]
+      }).select('+password');
+    }
+
     // Validate user exists
     if (!user) {
-      console.log(`User Not Found for identifier: "${identifier}"`);
+      console.log(`[FAILED] User Not Found for: "${cleanIdentifier}" in database "${mongoose.connection.name}"`);
       return res.status(404).json({ message: 'User not found' });
     }
 
     if (!user.password) {
-      console.error(`User found but missing password field in database for identifier: "${identifier}"`);
+      console.error(`[CRITICAL] User found but missing password field in database for identifier: "${cleanIdentifier}"`);
       return res.status(500).json({ message: 'Internal Server Error: Account data is corrupted' });
     }
 
-    console.log(`User Found: ${user.username} (${user.role})`);
+    console.log(`[SUCCESS] User Found: ${user.username} (${user.role})`);
 
     // Validate password
     const isPasswordCorrect = await user.comparePassword(password);

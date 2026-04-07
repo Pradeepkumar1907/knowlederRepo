@@ -19,12 +19,6 @@ const Topbar = ({ toggleSidebar }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSearch = (e) => {
-    if (e.key === 'Enter') {
-      navigate(`/articles?search=${e.target.value}`);
-    }
-  };
-
   const getDashboardPath = () => {
     if (!user) return '/login';
     if (user.role === 'admin') return '/admin-dashboard';
@@ -33,25 +27,20 @@ const Topbar = ({ toggleSidebar }) => {
   };
 
   return (
-    <header className="topbar">
+    <header className="topbar" style={{ position: 'relative', zIndex: 100 }}>
       <div className="topbar-content">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button className="mobile-toggle" onClick={toggleSidebar}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <button className="sidebar-toggle-btn" onClick={toggleSidebar} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
             <Menu size={24} />
           </button>
-          <div className="search-bar">
-            <Search size={18} />
-            <input 
-              type="text" 
-              placeholder="Search articles, topics or authors..." 
-              onKeyDown={handleSearch}
-            />
-          </div>
+          <Link to="/" className="topbar-logo" style={{ textDecoration: 'none', color: 'white', fontWeight: 700, fontSize: '1.2rem' }}>
+            KnowledgeRepo
+          </Link>
         </div>
 
         <div className="topbar-actions">
           {user ? (
-            <div className="user-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
+            <div className="profile-wrapper" ref={dropdownRef} style={{ position: 'relative' }}>
               <div 
                 className="user-profile-trigger" 
                 onClick={() => setShowDropdown(!showDropdown)}
@@ -80,21 +69,24 @@ const Topbar = ({ toggleSidebar }) => {
                   color: 'white',
                   fontWeight: 700
                 }}>
-                  {user.name.charAt(0).toUpperCase()}
+                   {user.name.charAt(0).toUpperCase()}
                 </div>
                 <ChevronDown size={16} />
               </div>
 
               {showDropdown && (
                 <div 
-                  className="dropdown-menu glass-card animate-up"
+                  className="dropdown-menu animate-up"
                   style={{
                     position: 'absolute',
-                    top: 'calc(100% + 10px)',
+                    top: '60px',
                     right: 0,
-                    width: '200px',
+                    minWidth: '180px',
+                    background: '#0f172a',
+                    borderRadius: '8px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
                     padding: '0.5rem',
-                    zIndex: 1000
+                    zIndex: 9999
                   }}
                 >
                   <Link to="/profile" className="sidebar-item" style={{ margin: 0 }} onClick={() => setShowDropdown(false)}>
@@ -109,7 +101,7 @@ const Topbar = ({ toggleSidebar }) => {
                   <button 
                     onClick={() => { logout(); setShowDropdown(false); }} 
                     className="sidebar-item" 
-                    style={{ border: 'none', background: 'none', width: '100%', cursor: 'pointer', margin: 0 }}
+                    style={{ border: 'none', background: 'none', width: '100%', cursor: 'pointer', margin: 0, textAlign: 'left', color: 'inherit', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
                   >
                     <LogOut size={18} />
                     Logout

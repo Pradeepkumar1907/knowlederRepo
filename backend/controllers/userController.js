@@ -39,12 +39,14 @@ const getUserProfile = async (req, res) => {
 // @desc Search users by name or username
 // @route GET /api/users/search
 const searchUsers = async (req, res) => {
-  const { query } = req.query;
+  const { q } = req.query;
+  const query = q || '';
   try {
     const users = await User.find({
       $or: [
         { name: { $regex: query, $options: 'i' } },
-        { username: { $regex: query, $options: 'i' } }
+        { username: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } }
       ]
     }).select('-password');
 

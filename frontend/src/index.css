@@ -97,8 +97,12 @@ button {
 .main-content {
   flex: 1;
   margin-left: var(--sidebar-width);
-  transition: var(--transition);
+  transition: margin-left 0.25s ease;
   min-width: 0;
+}
+
+.main-content.collapsed {
+  margin-left: 72px;
 }
 
 .content-body {
@@ -118,7 +122,57 @@ button {
   display: flex;
   flex-direction: column;
   z-index: 1001;
-  transition: var(--transition);
+  transition: width 0.25s ease, transform 0.3s ease;
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: 72px;
+}
+
+.sidebar.collapsed:hover {
+  width: var(--sidebar-width);
+  box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+}
+
+.sidebar.collapsed .sidebar-item {
+  justify-content: center;
+  padding: 0.85rem 0;
+  margin: 0.5rem 0.75rem;
+}
+
+.sidebar.collapsed .sidebar-header {
+  padding: 0;
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-label,
+.sidebar.collapsed .sidebar-divider,
+.sidebar.collapsed .label,
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+/* Re-show labels on hover expand */
+.sidebar.collapsed:hover .sidebar-label {
+  display: block;
+}
+.sidebar.collapsed:hover .sidebar-divider {
+  display: block;
+}
+.sidebar.collapsed:hover .label {
+  display: block;
+}
+.sidebar.collapsed:hover .logo-text {
+  display: inline;
+}
+.sidebar.collapsed:hover .sidebar-item {
+  justify-content: flex-start;
+  padding: 0.85rem 1rem;
+}
+.sidebar.collapsed:hover .sidebar-header {
+  padding: 0 1.5rem;
+  justify-content: flex-start;
 }
 
 .sidebar-header {
@@ -199,7 +253,12 @@ button {
   display: flex;
   align-items: center;
   padding: 0 2rem;
-  transition: var(--transition);
+  transition: left 0.25s ease;
+}
+
+.main-content.collapsed + .topbar,
+.app-layout.collapsed .topbar {
+  left: 72px;
 }
 
 .topbar-content {
@@ -324,6 +383,18 @@ button {
 .input-group {
   margin-bottom: 1.5rem;
   text-align: left;
+}
+
+.user-list-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.user-list-item {
+  border-bottom: 1px solid var(--card-border);
+}
+
+.user-list-item:last-child {
+  border-bottom: none;
 }
 
 .input-group label {

@@ -44,7 +44,7 @@ const AppContent = () => {
         <Route path="/articles" element={<ArticlesList />} />
         <Route path="/articles/:id" element={<ArticleDetail />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/search-users" element={
+        <Route path="/users" element={
           <ProtectedRoute><UsersSearch /></ProtectedRoute>
         } />
         
