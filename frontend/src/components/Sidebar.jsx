@@ -8,7 +8,8 @@ import {
   LayoutDashboard, 
   PlusCircle,
   Users,
-  X
+  X,
+  Layers
 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 
@@ -37,8 +38,19 @@ const Sidebar = ({ collapsed }) => {
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
         <Link to="/" className="sidebar-header" style={{ padding: 0, border: 'none', height: 'auto', textDecoration: 'none', color: 'inherit' }}>
-          <img src="/logo.png" className="logo" alt="Logo" />
-          {!collapsed && <span>KnowledgeRepo</span>}
+          <div className="logo-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="logo-container" style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--primary)', borderRadius: '6px' }}>
+              <img 
+                src="/logo.png" 
+                className="logo" 
+                alt="L" 
+                style={{ width: '28px', height: '28px', objectFit: 'contain' }}
+                onError={(e) => { e.target.style.display = 'none'; }} 
+              />
+              <Layers size={18} color="white" style={{ position: 'absolute' }} />
+            </div>
+            {!collapsed && <span>KnowledgeRepo</span>}
+          </div>
         </Link>
       </div>
 

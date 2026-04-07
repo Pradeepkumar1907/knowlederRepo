@@ -1,27 +1,24 @@
 const mongoose = require('mongoose');
 
-const messageSchema = new mongoose.Schema({
-  chatId: {
+const commentSchema = new mongoose.Schema({
+  article: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Chat',
+    ref: 'Article',
     required: true
   },
-  sender: {
+  author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
   text: {
     type: String,
-    required: function() { return !this.article; }
+    required: true
   },
-  article: {
+  parent: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Article'
-  },
-  deleted: {
-    type: Boolean,
-    default: false
+    ref: 'Comment',
+    default: null
   },
   createdAt: {
     type: Date,
@@ -29,4 +26,4 @@ const messageSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Message', messageSchema);
+module.exports = mongoose.model('Comment', commentSchema);

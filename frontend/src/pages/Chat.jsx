@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import { useAuth } from '../AuthContext';
 import { io } from 'socket.io-client';
-import { Send, User, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Send, User, MessageCircle, ArrowLeft, Trash2, ExternalLink, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Chat = () => {
@@ -121,6 +121,18 @@ const Chat = () => {
     return chat.participants.find(p => p._id !== user._id);
   };
 
+  const handleDeleteMessage = async (messageId) => {
+    if (window.confirm('Are you sure you want to delete this message?')) {
+      try {
+        await api.delete(`/api/chat/${messageId}`);
+        setMessages(prev => prev.map(m => m._id === messageId ? { ...m, deleted: true } : m));
+      } catch (error) {
+        console.error('Error deleting message:', error);
+        alert('Failed to delete message');
+      }
+    }
+  };
+
   return (
     <div className="chat-container animate-up">
       <div className="chat-layout glass-card">
@@ -199,9 +211,57 @@ const Chat = () => {
                 {messages.map((msg, index) => (
                   <div 
                     key={index} 
-                    className={`message-bubble ${msg.sender === user._id ? 'sent' : 'received'}`}
+                    className={`message-bubble ${msg.sender === user._id ? 'sent' : 'received'} ${msg.deleted ? 'deleted' : ''}`}
+                    style={{ position: 'relative', group: 'true' }}
                   >
-                    <div className="message-text">{msg.text}</div>
+                    {msg.deleted ? (
+                      <div className="message-text" style={{ fontStyle: 'italic', opacity: 0.6 }}>This message was deleted</div>
+                    ) : (
+                      <>
+                        {msg.article && (
+                          <div className="article-preview-card" style={{ 
+                            background: 'rgba(0, 0, 0, 0.2)', 
+                            padding: '1rem', 
+                            borderRadius: '12px', 
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            marginBottom: '0.75rem',
+                            minWidth: '200px'
+                          }}>
+                            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.75rem' }}>
+                              <div style={{ padding: '0.5rem', background: 'var(--primary)', borderRadius: '8px' }}>
+                                <FileText size={20} color="white" />
+                              </div>
+                              <div style={{ overflow: 'hidden' }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {msg.article.title}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--primary)', opacity: 0.8 }}>
+                                  {typeof msg.article.category === 'object' ? msg.article.category.name : msg.article.category}
+                                </div>
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => navigate(`/article/${msg.article._id || msg.article}`)}
+                              className="btn btn-primary"
+                              style={{ width: '100%', padding: '0.4rem', fontSize: '0.8rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                            >
+                              <ExternalLink size={14} /> Open Article
+                            </button>
+                          </div>
+                        )}
+                        {msg.text && <div className="message-text">{msg.text}</div>}
+                        
+                        {msg.sender === user._id && (
+                          <button 
+                            className="delete-msg-btn"
+                            onClick={() => handleDeleteMessage(msg._id)}
+                            title="Delete message"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </>
+                    )}
                     <div className="message-time">
                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
@@ -462,6 +522,35 @@ const Chat = () => {
           background: var(--card-bg);
           border: 1px solid var(--card-border);
           border-bottom-left-radius: 2px;
+        }
+
+        .message-bubble.deleted {
+          background: rgba(255, 255, 255, 0.02) !important;
+          border: 1px dashed var(--card-border) !important;
+          color: var(--text-secondary) !important;
+          box-shadow: none !important;
+        }
+
+        .delete-msg-btn {
+          position: absolute;
+          right: -30px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: #ef4444;
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity 0.2s;
+          padding: 5px;
+        }
+
+        .message-bubble:hover .delete-msg-btn {
+          opacity: 0.6;
+        }
+
+        .delete-msg-btn:hover {
+          opacity: 1 !important;
         }
 
         .message-time {

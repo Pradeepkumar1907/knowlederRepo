@@ -1,5 +1,6 @@
 const Article = require('../models/Article');
 const User = require('../models/User');
+const Comment = require('../models/Comment');
 
 // @desc Get all articles with search and filtering
 // @route GET /api/articles
@@ -187,7 +188,7 @@ const getMyArticles = async (req, res) => {
 // @route POST /api/articles/:id/comment
 const addComment = async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, parentId } = req.body;
     if (!text) {
       return res.status(400).json({ message: 'Comment text is required' });
     }
@@ -197,35 +198,71 @@ const addComment = async (req, res) => {
       return res.status(404).json({ message: 'Article not found' });
     }
 
-    article.comments.push({
-      user: req.user._id,
-      text: text
+    const comment = await Comment.create({
+      article: req.params.id,
+      author: req.user._id,
+      text: text,
+      parent: parentId || null
     });
 
-    await article.save();
+    // Return the updated tree
+    const comments = await Comment.find({ article: req.params.id }).populate('author', 'name');
+    
+    const map = {};
+    const roots = [];
 
-    // Re-populate and return the comments
-    const updatedArticle = await Article.findById(req.params.id)
-      .populate('comments.user', 'name');
+    comments.forEach(c => {
+      const commentObj = c.toObject();
+      commentObj.replies = [];
+      map[c._id.toString()] = commentObj;
+    });
 
-    res.status(201).json(updatedArticle.comments);
+    comments.forEach(c => {
+      const commentObj = map[c._id.toString()];
+      if (c.parent) {
+        if (map[c.parent.toString()]) {
+          map[c.parent.toString()].replies.push(commentObj);
+        }
+      } else {
+        roots.push(commentObj);
+      }
+    });
+
+    res.status(201).json(roots);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc Get comments for an article
+// @desc Get comments for an article (as a tree)
 // @route GET /api/articles/:id/comments
 const getComments = async (req, res) => {
   try {
-    const article = await Article.findById(req.params.id)
-      .populate('comments.user', 'name');
+    const comments = await Comment.find({ article: req.params.id })
+      .populate('author', 'name')
+      .sort({ createdAt: 1 });
 
-    if (!article) {
-      return res.status(404).json({ message: 'Article not found' });
-    }
+    const map = {};
+    const roots = [];
 
-    res.json(article.comments);
+    comments.forEach(c => {
+      const commentObj = c.toObject();
+      commentObj.replies = [];
+      map[c._id.toString()] = commentObj;
+    });
+
+    comments.forEach(c => {
+      const commentObj = map[c._id.toString()];
+      if (c.parent) {
+        if (map[c.parent.toString()]) {
+          map[c.parent.toString()].replies.push(commentObj);
+        }
+      } else {
+        roots.push(commentObj);
+      }
+    });
+
+    res.json(roots);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

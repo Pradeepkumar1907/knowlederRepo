@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../AuthContext';
-import { ThumbsUp, Calendar, User, ArrowLeft, Edit, Trash2, Bookmark } from 'lucide-react';
+import { ThumbsUp, Calendar, User, ArrowLeft, Edit, Trash2, Bookmark, Share2, MessageCircle } from 'lucide-react';
 import FollowButton from '../components/FollowButton';
 import SaveToCollectionModal from '../components/SaveToCollectionModal';
+import ShareArticleModal from '../components/ShareArticleModal';
 
 const ArticleDetail = () => {
   const { id } = useParams();
@@ -17,6 +18,8 @@ const ArticleDetail = () => {
   const [newComment, setNewComment] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [replyTo, setReplyTo] = useState(null);
 
   useEffect(() => {
     const fetchArticleData = async () => {
@@ -71,9 +74,13 @@ const ArticleDetail = () => {
 
     setCommentLoading(true);
     try {
-      const { data } = await api.post(`/api/articles/${id}/comment`, { text: newComment });
+      const { data } = await api.post(`/api/articles/${id}/comment`, { 
+        text: newComment,
+        parentId: replyTo?._id 
+      });
       setComments(data);
       setNewComment('');
+      setReplyTo(null);
     } catch (error) {
       console.error(error);
     } finally {
@@ -128,6 +135,14 @@ const ArticleDetail = () => {
 
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button 
+            onClick={() => { if (!user) navigate('/login'); else setIsShareModalOpen(true); }}
+            className={`btn btn-outline`}
+            style={{ borderRadius: '50px', padding: '0.5rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Share2 size={18} /> Share
+          </button>
+
+          <button 
             onClick={() => { if (!user) navigate('/login'); else setIsModalOpen(true); }}
             className={`btn btn-outline`}
             style={{ borderRadius: '50px', padding: '0.5rem 1.5rem' }}
@@ -169,14 +184,28 @@ const ArticleDetail = () => {
 
         {user ? (
           <form onSubmit={handleCommentSubmit} style={{ marginBottom: '3rem' }}>
+            {replyTo && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(99, 102, 241, 0.1)', padding: '0.75rem 1rem', borderRadius: '8px 8px 0 0', border: '1px solid var(--card-border)', borderBottom: 'none' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--primary)' }}>
+                  Replying to <strong>{replyTo.author?.name}</strong>
+                </span>
+                <button 
+                  type="button" 
+                  onClick={() => setReplyTo(null)}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.8rem' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
             <textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="What are your thoughts?"
+              placeholder={replyTo ? "Write a reply..." : "What are your thoughts?"}
               style={{
                 width: '100%',
                 padding: '1.25rem',
-                borderRadius: '12px',
+                borderRadius: replyTo ? '0 0 12px 12px' : '12px',
                 background: 'rgba(255, 255, 255, 0.03)',
                 border: '1px solid var(--card-border)',
                 color: 'white',
@@ -197,7 +226,7 @@ const ArticleDetail = () => {
                 disabled={commentLoading || !newComment.trim()}
                 style={{ padding: '0.75rem 2rem' }}
               >
-                {commentLoading ? 'Posting...' : 'Post Comment'}
+                {commentLoading ? 'Posting...' : replyTo ? 'Post Reply' : 'Post Comment'}
               </button>
             </div>
           </form>
@@ -208,28 +237,19 @@ const ArticleDetail = () => {
           </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '600px', overflowY: 'auto', paddingRight: '0.5rem' }} className="custom-scrollbar">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '1000px', overflowY: 'auto', paddingRight: '0.5rem' }} className="custom-scrollbar">
           {comments.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-secondary)', border: '1px dashed var(--card-border)', borderRadius: '12px' }}>
               No comments yet. Be the first to share your thoughts!
             </div>
           ) : (
-            comments.map((comment) => (
-              <div key={comment._id} className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--card-border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, color: 'white' }}>
-                      {comment.user?.name?.charAt(0)}
-                    </div>
-                    <span style={{ fontWeight: 600 }}>{comment.user?.name}</span>
-                  </div>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    {new Date(comment.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </span>
-                </div>
-                <p style={{ color: '#cbd5e1', lineHeight: '1.6' }}>{comment.text}</p>
-              </div>
-            )).reverse()
+            <CommentList 
+              comments={comments} 
+              onReply={(c) => {
+                setReplyTo(c);
+                window.scrollTo({ top: document.querySelector('form')?.offsetTop - 100, behavior: 'smooth' });
+              }} 
+            />
           )}
         </div>
       </div>
@@ -238,6 +258,49 @@ const ArticleDetail = () => {
         onClose={() => setIsModalOpen(false)} 
         articleId={id} 
       />
+      <ShareArticleModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        articleId={id}
+        articleTitle={article.title}
+        articleCategory={typeof article.category === 'object' ? article.category.name : article.category}
+      />
+    </div>
+  );
+};
+
+const CommentList = ({ comments, onReply, depth = 0 }) => {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginLeft: depth > 0 ? '2rem' : '0', borderLeft: depth > 0 ? '2px solid rgba(255,255,255,0.05)' : 'none', paddingLeft: depth > 0 ? '1rem' : '0' }}>
+      {comments.map((comment) => (
+        <div key={comment._id}>
+          <div className="glass-card" style={{ padding: '1.25rem', border: '1px solid var(--card-border)', background: 'rgba(255, 255, 255, 0.02)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700, color: 'white' }}>
+                  {comment.author?.name?.charAt(0)}
+                </div>
+                <span style={{ fontWeight: 600 }}>{comment.author?.name}</span>
+              </div>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                {new Date(comment.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+              </span>
+            </div>
+            <p style={{ color: '#cbd5e1', lineHeight: '1.6', fontSize: '0.95rem', marginBottom: '1rem' }}>{comment.text}</p>
+            <button 
+              onClick={() => onReply(comment)}
+              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0' }}
+            >
+              <MessageCircle size={14} /> Reply
+            </button>
+          </div>
+          {comment.replies && comment.replies.length > 0 && (
+            <div style={{ marginTop: '1rem' }}>
+              <CommentList comments={comment.replies} onReply={onReply} depth={depth + 1} />
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };

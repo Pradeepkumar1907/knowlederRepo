@@ -1,5 +1,6 @@
 const Chat = require('../models/Chat');
 const User = require('../models/User');
+const Message = require('../models/Message');
 
 // @desc Create or get chat between logged-in user and another user
 // @route POST /api/chat/:userId
@@ -62,4 +63,41 @@ const getUserChats = async (req, res) => {
   }
 };
 
-module.exports = { createOrGetChat, getUserChats };
+// @desc Send article to chat (Create chat if not exists)
+// @route POST /api/chat/send
+const sendArticleToChat = async (req, res) => {
+  const { receiverId, articleId } = req.body;
+
+  try {
+    // 1. Find or create chat
+    let chat = await Chat.findOne({
+      participants: { $all: [req.user._id, receiverId] }
+    });
+
+    if (!chat) {
+      chat = await Chat.create({
+        participants: [req.user._id, receiverId],
+        lastMessage: 'Shared an article'
+      });
+    } else {
+      await Chat.findByIdAndUpdate(chat._id, {
+        lastMessage: 'Shared an article',
+        updatedAt: Date.now()
+      });
+    }
+
+    // 2. Create message
+    const message = await Message.create({
+      chatId: chat._id,
+      sender: req.user._id,
+      text: null,
+      article: articleId
+    });
+
+    res.status(201).json({ message, chatId: chat._id });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createOrGetChat, getUserChats, sendArticleToChat };
